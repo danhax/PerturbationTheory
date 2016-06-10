@@ -1,0 +1,30 @@
+
+run directory with link to ../SRC/pert
+
+run program pert after compiling in BIN
+
+output files
+
+onevec.dat
+
+  first-order perturbation theory result.
+  eight columns: time, E(t), then 3 complex amplitudes, first order result
+
+onevec_abs.dat
+
+  first-order perturbation theory result.
+  five columns: time, E(t), then 3 populations (abs-value-squared of onevec.dat)
+
+twovec.dat, twovec_abs.dat, threevec.dat, threevec_abs.dat etc.
+
+  like onevec.dat and onevec_abs.dat, second and third order results
+
+sumvec.dat
+
+  sum of zeroth+first+second+third order result
+
+sumvec_abs.dat
+
+  sum of zeroth+first+second+third order result
+  six columns, t=time, E(t), 3 populations, sum of the 3 populations
+

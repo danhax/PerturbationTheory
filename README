@@ -11,7 +11,7 @@ Input file RUNS/Input.Inp
 
 Output files e.g. RUNS/twovec.dat
 
-  contain populations as a function of time form perturbation theory
+  contain populations as a function of time from perturbation theory
 
   first column t=time, second column E(t), then perturbation theory results for 3 states
 
