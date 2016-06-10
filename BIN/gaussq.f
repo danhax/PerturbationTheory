@@ -1,0 +1,1 @@
+../SRC/gaussq.f
