@@ -1,0 +1,17 @@
+
+perturbation theory program.
+
+Source in SRC/
+Compliation directory BIN/
+Run directory RUNS/
+
+Input file RUNS/Input.Inp
+
+  3 states, energies 0.95, 1.05, 10, pulse energy 9
+
+Output files e.g. RUNS/twovec.dat
+
+  contain populations as a function of time form perturbation theory
+
+  first column t=time, second column E(t), then perturbation theory results for 3 states
+
