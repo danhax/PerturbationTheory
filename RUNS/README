@@ -1,9 +1,9 @@
 
-run directory with link to ../SRC/pert
+run directory with link to ../BIN/pert
 
 run program pert after compiling in BIN
 
-output files
+output files, given 3-state calculation:
 
 onevec.dat
 
