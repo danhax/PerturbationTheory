@@ -37,8 +37,6 @@ module parameters
 
   integer :: velflag=0
 
-  integer :: exactflag=0
-
   character(len=SLN) :: inpfile="Input.Inp"
 
   character(len=SLN) :: nullbuff

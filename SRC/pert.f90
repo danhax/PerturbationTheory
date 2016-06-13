@@ -79,6 +79,7 @@ end subroutine perttheory
 
 
 module jacopmod
+  implicit none
 
 contains
   subroutine jacoperate(invec,outvec)
@@ -100,7 +101,7 @@ contains
     real*8, intent(in) :: midtime
     complex*16, intent(in) :: invec(numstates)
     complex*16, intent(out) :: outvec(numstates)
-    complex*16 :: mypot
+    real*8 :: mypot
 
     mypot = vectdpot(midtime, velflag)
     outvec(:) = mypot * MATMUL(couplingmat(1:numstates,1:numstates), invec(:))

@@ -46,8 +46,7 @@ subroutine getparams()
 !! DUMMIES
   integer :: restrictms=0,  dfrestrictflag=0, allspinproject=1
 
-  NAMELIST/parinp/ numstates,stateEnergies,couplingmat,expotol,par_timestep,numsteps,notiming,&
-       exactflag
+  NAMELIST/parinp/ numstates,stateEnergies,couplingmat,expotol,par_timestep,numsteps,notiming
 
   OFL
   write(mpifileptr, *)
