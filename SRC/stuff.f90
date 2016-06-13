@@ -29,14 +29,15 @@ subroutine save1(nstates,atime,btime,tstep,vector,filename,absflag)
   if (absflag.eq.0) then
      open(1111, file=filename//".dat",status="unknown")
      do itime=0,numsteps
-        write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), vector(:,itime)
+        write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), &
+             vector(1:min(numstates,maxoutstates),itime)
      enddo
      close(1111)
   else
      open(1111, file=filename//"_abs.dat",status="unknown")
      do itime=0,numsteps
         write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), &
-             abs(vector(:,itime)**2), SUM(abs(vector(:,itime)**2))
+             abs(vector(1:min(numstates,maxoutstates),itime)**2), SUM(abs(vector(:,itime)**2))
      enddo
      close(1111)
   endif

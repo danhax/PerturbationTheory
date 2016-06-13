@@ -70,6 +70,15 @@ subroutine exactprop(time1,time2,invec,outvec)
         hammatexp(istate,istate) = hammatexp(istate,istate) + &
              (0d0,-1d0) * par_timestep * myStateEnergies(istate)
      enddo
+
+!  ummm... does not seem to be right including a-squared term
+!     if (velflag.ne.0) then
+!        do istate=1,numstates
+!           hammatexp(istate,istate) = hammatexp(istate,istate) + &
+!                (0d0,-1d0) * par_timestep * mypot**2/4d0
+!        enddo
+!     endif
+
      call expmat(hammatexp,numstates)
      outvec(:) = MATMUL(hammatexp(:,:),invec(:))
   endif

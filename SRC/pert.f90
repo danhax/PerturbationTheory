@@ -105,6 +105,11 @@ contains
 
     mypot = vectdpot(midtime, velflag)
     outvec(:) = mypot * MATMUL(mycouplingmat(1:numstates,1:numstates), invec(:))
+
+!  ummm... does not seem to be right including a-squared term
+!    if (velflag.ne.0) then
+!       outvec(:) = outvec(:) + mypot**2/4d0 * invec(:)
+!    endif
   end subroutine potoperate
 
 end module jacopmod

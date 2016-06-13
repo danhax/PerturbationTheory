@@ -28,7 +28,7 @@ omega(1)=0.04d0
 omega2(1)=9d0
 intensity(1)=10d0
 
-velflag=0
+velflag=1
 
 /
 

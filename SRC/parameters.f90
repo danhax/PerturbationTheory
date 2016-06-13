@@ -25,6 +25,7 @@ module parameters
   use constant_parameters
   implicit none
   integer :: numstates=2
+  integer :: maxoutstates=3
 
   real*8 :: expotol=1d-7
   real*8 :: par_timestep=0.05d0
