@@ -2,29 +2,12 @@
 #include "Definitions.INC"
 
 
-program pert
-  use parameters
-  implicit none
-  integer :: i
-
-  pi=4d0*atan(1d0)
-  do i=1,SLN
-     nullbuff(i:i)=" "
-  enddo
-
-  call getinpfile()
-  call getparams()
-  call perttheory()
-
-end program pert
-
-
 subroutine perttheory()
   use parameters
   use pulsesubmod
   implicit none
   real*8 :: t1,t2
-  integer :: itime,numiters
+  integer :: itime
   complex*16, allocatable :: zerovec(:,:), onevec(:,:), twovec(:,:), threevec(:,:), sumvec(:,:)
 
   allocate(zerovec(numstates,0:numsteps), onevec(numstates,0:numsteps), &
@@ -43,20 +26,12 @@ subroutine perttheory()
   do itime=1,numsteps  !! propagation from itime-1 to itime
      t1=(itime-1)*par_timestep
      t2=itime*par_timestep
-
-     call expoprop(t1,zerovec(:,itime-1),t2,zerovec(:,itime),onevec(:,itime-1),onevec(:,itime),numiters)
+     call expoprop(t1,zerovec(:,itime-1),t2,zerovec(:,itime),onevec(:,itime-1),onevec(:,itime))
   enddo
 
-  open(1111, file="onevec.dat",status="unknown")
-  do itime=0,numsteps
-     write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), onevec(:,itime)
-  enddo
-  close(1111)
-  open(1111, file="onevec_abs.dat",status="unknown")
-  do itime=0,numsteps
-     write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), abs(onevec(:,itime)**2)
-  enddo
-  close(1111)
+  call save1(numstates,0,numsteps,par_timestep,onevec(:,:),"onevec",0)
+  call save1(numstates,0,numsteps,par_timestep,onevec(:,:),"onevec",1)
+
 
 !!!!!!!   second-order wave function   !!!!!!
 
@@ -65,20 +40,11 @@ subroutine perttheory()
   do itime=1,numsteps  !! propagation from itime-1 to itime
      t1=(itime-1)*par_timestep
      t2=itime*par_timestep
-
-     call expoprop(t1,onevec(:,itime-1),t2,onevec(:,itime),twovec(:,itime-1),twovec(:,itime),numiters)
+     call expoprop(t1,onevec(:,itime-1),t2,onevec(:,itime),twovec(:,itime-1),twovec(:,itime))
   enddo
 
-  open(1111, file="twovec.dat",status="unknown")
-  do itime=0,numsteps
-     write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), twovec(:,itime)
-  enddo
-  close(1111)
-  open(1111, file="twovec_abs.dat",status="unknown")
-  do itime=0,numsteps
-     write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), abs(twovec(:,itime)**2)
-  enddo
-  close(1111)
+  call save1(numstates,0,numsteps,par_timestep,twovec(:,:),"twovec",0)
+  call save1(numstates,0,numsteps,par_timestep,twovec(:,:),"twovec",1)
 
 
 !!!!!!!   third-order wave function   !!!!!!
@@ -89,20 +55,11 @@ subroutine perttheory()
      t1=(itime-1)*par_timestep
      t2=itime*par_timestep
 
-     call expoprop(t1,twovec(:,itime-1),t2,twovec(:,itime),threevec(:,itime-1),threevec(:,itime),numiters)
+     call expoprop(t1,twovec(:,itime-1),t2,twovec(:,itime),threevec(:,itime-1),threevec(:,itime))
   enddo
 
-  open(1111, file="threevec.dat",status="unknown")
-  do itime=0,numsteps
-     write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), threevec(:,itime)
-  enddo
-  close(1111)
-  open(1111, file="threevec_abs.dat",status="unknown")
-  do itime=0,numsteps
-     write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), abs(threevec(:,itime)**2)
-  enddo
-  close(1111)
-
+  call save1(numstates,0,numsteps,par_timestep,threevec(:,:),"threevec",0)
+  call save1(numstates,0,numsteps,par_timestep,threevec(:,:),"threevec",1)
 
 !! SUM THEM
 
@@ -110,17 +67,8 @@ subroutine perttheory()
 
   sumvec(:,:)=zerovec(:,:) + onevec(:,:) + twovec(:,:) + threevec(:,:)
 
-  open(1111, file="sumvec.dat",status="unknown")
-  do itime=0,numsteps
-     write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), sumvec(:,itime)
-  enddo
-  close(1111)
-  open(1111, file="sumvec_abs.dat",status="unknown")
-  do itime=0,numsteps
-     write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), abs(sumvec(:,itime)**2), &
-          SUM(abs(sumvec(:,itime)**2))
-  enddo
-  close(1111)
+  call save1(numstates,0,numsteps,par_timestep,sumvec(:,:),"sumvec",0)
+  call save1(numstates,0,numsteps,par_timestep,sumvec(:,:),"sumvec",1)
 
   deallocate(zerovec, onevec, twovec, threevec, sumvec)
 
@@ -162,20 +110,18 @@ end module jacopmod
 
 
 
-subroutine expoprop(time1, drivingvec1, time2, drivingvec2, invec, outvec, numiters)
+subroutine expoprop(time1, drivingvec1, time2, drivingvec2, invec, outvec)
   use parameters
   use jacopmod
   implicit none
   real*8,intent(in) :: time1,time2
   complex*16,intent(in) :: invec(numstates), drivingvec1(numstates), drivingvec2(numstates)
   complex*16,intent(out) :: outvec(numstates)
-  integer,intent(out) :: numiters
   complex*16 :: avec1(numstates), avec2(numstates)
   real*8 :: tdiff, midtime
   integer, save :: icalled=0
   integer :: istate
 
-  numiters=0
   icalled=icalled+1
 
   avec1=0; avec2=0
@@ -240,3 +186,29 @@ end subroutine openfile
 subroutine closefile()
 end subroutine closefile
 
+
+subroutine save1(nstates,atime,btime,tstep,vector,filename,absflag)
+  use parameters
+  use pulsesubmod
+  implicit none
+  integer,intent(in) :: nstates,atime,btime,absflag
+  real*8,intent(in) :: tstep
+  complex*16,intent(in) :: vector(nstates,atime:btime)
+  character*(*), intent(in) :: filename
+  integer :: itime
+
+  if (absflag.eq.0) then
+     open(1111, file=filename//".dat",status="unknown")
+     do itime=0,numsteps
+        write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), vector(:,itime)
+     enddo
+     close(1111)
+  else
+     open(1111, file=filename//"_abs.dat",status="unknown")
+     do itime=0,numsteps
+        write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), &
+             abs(vector(:,itime)**2), SUM(abs(vector(:,itime)**2))
+     enddo
+     close(1111)
+  endif
+end subroutine save1

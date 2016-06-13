@@ -35,13 +35,16 @@ module parameters
   integer :: numsteps=100
   integer :: notiming=2
 
+  integer :: velflag=0
+
+  integer :: exactflag=0
+
   character(len=SLN) :: inpfile="Input.Inp"
 
   character(len=SLN) :: nullbuff
 
-  integer :: velflag=0
-
 end module parameters
+
 
 
 module pulse_parameters           !!      NAMELIST PULSE except for conjgpropflag

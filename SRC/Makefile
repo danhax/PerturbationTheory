@@ -1,22 +1,23 @@
 
 include Makefile.header
 
-SRCS= parameters.o gaussq.o eigen.o d1mach.o utils.o getparams.o pulse.o $(ARGO) 
+SRCS= parameters.o gaussq.o eigen.o d1mach.o utils.o getparams.o pulse.o pert.o $(ARGO) 
 
 DEPEND= Makefile.header Makefile parameters.o
 
 default: pert
 
 clean:
-	rm *.o *.mod *~  pert
+	rm *.o *.mod *~ pert
 
-STUFFS= pert.o $(SRCS)
-
-pert:   $(STUFFS) 
-	$(F90) $(LOADFLAGS) -o pert $(STUFFS) $(LAPACK)
+pert:   mainpert.o $(SRCS)
+	$(F90) $(LOADFLAGS) -o pert mainpert.o $(SRCS) $(LAPACK)
 
 parameters.o: Makefile.header Makefile parameters.F90 
 	$(F90) $(FFLAGS) $(MPIFLAG) -c parameters.F90
+
+mainpert.o: $(DEPEND) mainpert.F90
+	$(F90) $(FFLAGS) $(MPIFLAG) -c mainpert.F90 
 
 pert.o: $(DEPEND) pert.F90 pulse.o
 	$(F90) $(FFLAGS) $(MPIFLAG) -c pert.F90 
