@@ -6,6 +6,5 @@
 #define CFL call closefile()
 #define CFLST call closefile(); call mpistop
 
-#define MXST 20
 #define SLN 200
 

@@ -25,10 +25,6 @@ module parameters
   use constant_parameters
   implicit none
   integer :: numstates=2
-!!$  complex*16 :: stateEnergies(MXST)=0d0
-!!$  complex*16 :: couplingmat(MXST,MXST)=0d0
-  real*8 :: stateEnergies(MXST)=0d0
-  real*8 :: couplingmat(MXST,MXST)=0d0
 
   real*8 :: expotol=1d-7
   real*8 :: par_timestep=0.05d0
@@ -38,6 +34,11 @@ module parameters
   integer :: velflag=0
 
   character(len=SLN) :: inpfile="Input.Inp"
+
+!! namelist input stateenergies, imagstateenergies, and couplingmat.
+!! internal variables:
+  complex*16,allocatable :: mystateEnergies(:)
+  complex*16,allocatable :: mycouplingmat(:,:)
 
   character(len=SLN) :: nullbuff
 

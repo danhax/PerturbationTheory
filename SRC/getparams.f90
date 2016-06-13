@@ -3,6 +3,7 @@
   
 #include "Definitions.INC"
  
+#define MXST 20
 
 subroutine getinpfile()
   use parameters
@@ -32,7 +33,8 @@ end subroutine getinpfile
 subroutine getparams()
   use parameters
   implicit none
-  integer :: nargs, getlen, i, len,  ishell, ispf,j, myiostat, iiflag,needpulse,ipulse
+  integer :: nargs, getlen, i, len,  ishell, ispf,j, myiostat, iiflag,needpulse,ipulse,&
+       istate
 #ifdef PGFFLAG
   integer :: myiargc
 #endif
@@ -45,8 +47,12 @@ subroutine getparams()
 
 !! DUMMIES
   integer :: restrictms=0,  dfrestrictflag=0, allspinproject=1
+  real*8 :: stateEnergies(MXST)=0d0
+  real*8 :: imagStateEnergies(MXST)=0d0
+  real*8 :: couplingmat(MXST,MXST)=0d0
 
-  NAMELIST/parinp/ numstates,stateEnergies,couplingmat,expotol,par_timestep,numsteps,notiming
+  NAMELIST/parinp/ numstates,stateEnergies,couplingmat,expotol,par_timestep,numsteps,notiming,&
+       imagStateEnergies
 
   OFL
   write(mpifileptr, *)
@@ -94,8 +100,26 @@ subroutine getparams()
   write(mpifileptr, *) " ****************************************************************************"     
   write(mpifileptr,*);  call closefile()
 
+!! enforced
+  do istate=1,numstates
+     couplingmat(istate,istate)=0d0
+  enddo
+
+  allocate(mystateenergies(numstates),mycouplingmat(numstates,numstates))
+  mystateenergies(:) = stateenergies(1:numstates) &
+       + (0d0,1d0) * imagstateenergies(1:numstates)
+  mycouplingmat(:,:) = couplingmat(1:numstates,1:numstates)
+
   call getpulse(0)
- 
+
+  if (velflag.ne.0) then
+     OFLWR "changing matrix elements (input in length gauge) to velocity gauge"; CFL
+     do istate=1,numstates
+        mycouplingmat(istate,1:numstates) = mycouplingmat(istate,1:numstates) &
+             * (0d0,1d0) * (stateEnergies(istate)-stateEnergies(1:numstates))
+     enddo
+  endif
+
 end subroutine getparams
 
 

@@ -16,7 +16,7 @@ subroutine perttheory()
 !! zeroth-order wave function
   zerovec(:,:)=0d0
   do itime=0,numsteps
-     zerovec(1,itime)=exp((0d0,-1d0)*stateEnergies(1)*itime*par_timestep)
+     zerovec(1,itime)=exp((0d0,-1d0)*myStateEnergies(1)*itime*par_timestep)
   enddo
 
 !!!!!    first-order wave function    !!!!!
@@ -90,7 +90,7 @@ contains
     integer :: istate
 
     do istate=1,numstates
-       outvec(istate)=invec(istate)*(0d0,-1d0)*stateEnergies(istate)
+       outvec(istate)=invec(istate)*(0d0,-1d0)*myStateEnergies(istate)
     enddo
   end subroutine jacoperate
 
@@ -104,7 +104,7 @@ contains
     real*8 :: mypot
 
     mypot = vectdpot(midtime, velflag)
-    outvec(:) = mypot * MATMUL(couplingmat(1:numstates,1:numstates), invec(:))
+    outvec(:) = mypot * MATMUL(mycouplingmat(1:numstates,1:numstates), invec(:))
   end subroutine potoperate
 
 end module jacopmod
@@ -137,13 +137,13 @@ subroutine expoprop(time1, drivingvec1, time2, drivingvec2, invec, outvec)
   do istate=1,numstates
 
 !! zeroth order
-     outvec(istate)=exp((0d0,-1d0)*stateEnergies(istate)*par_timestep)*invec(istate) + &
-          par_timestep*myphi1((0d0,-1d0)*stateEnergies(istate)*par_timestep)*(avec1(istate)+avec2(istate))/2d0
+     outvec(istate)=exp((0d0,-1d0)*myStateEnergies(istate)*par_timestep)*invec(istate) + &
+          par_timestep*myphi1((0d0,-1d0)*myStateEnergies(istate)*par_timestep)*(avec1(istate)+avec2(istate))/2d0
 
 !! first order... think there is a mistake, not working better
-!     outvec(istate)=exp((0d0,-1d0)*stateEnergies(istate)*par_timestep)*invec(istate) + &
-!          par_timestep*myphi1((0d0,-1d0)*stateEnergies(istate)*par_timestep)*avec1(istate) + &
-!          par_timestep*myphi2((0d0,-1d0)*stateEnergies(istate)*par_timestep)*(avec2(istate)-avec1(istate))
+!     outvec(istate)=exp((0d0,-1d0)*myStateEnergies(istate)*par_timestep)*invec(istate) + &
+!          par_timestep*myphi1((0d0,-1d0)*myStateEnergies(istate)*par_timestep)*avec1(istate) + &
+!          par_timestep*myphi2((0d0,-1d0)*myStateEnergies(istate)*par_timestep)*(avec2(istate)-avec1(istate))
 
   enddo
 
@@ -172,44 +172,3 @@ contains
 
 end subroutine expoprop
 
-
-subroutine mpistop()
-  use fileptrmod
-  implicit none
-  call waitawhile()
-  OFLWR "PERTTHEORY STOP!";CFL
-  stop
-end subroutine mpistop
-
-subroutine openfile()
-end subroutine openfile
-
-subroutine closefile()
-end subroutine closefile
-
-
-subroutine save1(nstates,atime,btime,tstep,vector,filename,absflag)
-  use parameters
-  use pulsesubmod
-  implicit none
-  integer,intent(in) :: nstates,atime,btime,absflag
-  real*8,intent(in) :: tstep
-  complex*16,intent(in) :: vector(nstates,atime:btime)
-  character*(*), intent(in) :: filename
-  integer :: itime
-
-  if (absflag.eq.0) then
-     open(1111, file=filename//".dat",status="unknown")
-     do itime=0,numsteps
-        write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), vector(:,itime)
-     enddo
-     close(1111)
-  else
-     open(1111, file=filename//"_abs.dat",status="unknown")
-     do itime=0,numsteps
-        write(1111,'(1000F18.10)') itime*par_timestep, vectdpot(itime*par_timestep,velflag), &
-             abs(vector(:,itime)**2), SUM(abs(vector(:,itime)**2))
-     enddo
-     close(1111)
-  endif
-end subroutine save1

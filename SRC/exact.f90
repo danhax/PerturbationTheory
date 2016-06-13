@@ -42,7 +42,7 @@ subroutine exactalloc()
   implicit none
   allocate(hammatexp(numstates,numstates),h0diagexp(numstates))
   hammatexp=0d0
-  h0diagexp(:) = exp((0d0,-1d0) * par_timestep * stateEnergies(1:numstates))
+  h0diagexp(:) = exp((0d0,-1d0) * par_timestep * myStateEnergies(1:numstates))
 end subroutine exactalloc
 
 
@@ -65,10 +65,10 @@ subroutine exactprop(time1,time2,invec,outvec)
   if (mypot.eq.0d0) then
      outvec(:) = invec(:) * h0diagexp(:)
   else
-     hammatexp(:,:) = mypot * (0d0,-1d0) * par_timestep * couplingmat(1:numstates,1:numstates)
+     hammatexp(:,:) = mypot * (0d0,-1d0) * par_timestep * mycouplingmat(1:numstates,1:numstates)
      do istate=1,numstates
         hammatexp(istate,istate) = hammatexp(istate,istate) + &
-             (0d0,-1d0) * par_timestep * stateEnergies(istate)
+             (0d0,-1d0) * par_timestep * myStateEnergies(istate)
      enddo
      call expmat(hammatexp,numstates)
      outvec(:) = MATMUL(hammatexp(:,:),invec(:))
