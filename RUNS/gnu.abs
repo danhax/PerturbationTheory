@@ -7,6 +7,7 @@ set style data lines
 
 set xrange [30:40]
 set xrange [0:10]
+set xrange [0.32:*]
 set xrange [70:*]
 set xrange [*:*]
 
@@ -14,14 +15,21 @@ set term x11 0
 
 plot "LEN/propvec_abs.dat" using 1:4 lt 1 lw 6 title "2 len abs^2"
 replot "ASQUARED/propvec_abs.dat" using 1:4 lt 4 lw 4 title "2 asquared abs^2"
-replot "propvec_abs.dat" using 1:4 lt 3 lw 2 title "2 vel abs^2"
+replot "propvec_abs.dat" using 1:4 lt -1 lw 1 title "2 vel abs^2"
+
+replot "LEN/sumvec_abs.dat" using 1:4 every 20 with points ps 2.5 pt 7 lt 1 lw 6 title "2 len abs^2 3rd order"
+replot "ASQUARED/sumvec_abs.dat" using 1:4 every 20 with points ps 2 pt 7 lt 4 lw 4 title "2 asquared abs^2 3rd order"
+replot "sumvec_abs.dat" using 1:4 every 20 with points ps 1.5 pt 7 lt -1 lw 1 title "2 vel abs^2 3rd order"
 
 set term x11 2
 
 plot "LEN/propvec_abs.dat" using 1:5 lt 1 lw 6 title "3 len abs^2"
 replot "ASQUARED/propvec_abs.dat" using 1:5 lt 4 lw 4 title "3 asquared abs^2"
-replot "propvec_abs.dat" using 1:5 lt 3 lw 2 title "3 vel abs^2"
+replot "propvec_abs.dat" using 1:5 lt -1 lw 1 title "3 vel abs^2"
 
+replot "LEN/sumvec_abs.dat" using 1:5 every 20 with points ps 2.5 pt 7 lt 1 lw 6 title "3 len abs^2 3rd order"
+replot "ASQUARED/sumvec_abs.dat" using 1:5 every 20 with points ps 2 pt 7 lt 4 lw 4 title "3 asquared abs^2 3rd order"
+replot "sumvec_abs.dat" using 1:5 every 20 with points ps 1.5 pt 7 lt -1 lw 1 title "3 vel abs^2 3rd order"
 
 ' |gnuplot -persist
 

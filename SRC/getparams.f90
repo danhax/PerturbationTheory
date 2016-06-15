@@ -52,7 +52,7 @@ subroutine getparams()
   real*8 :: couplingmat(MXST,MXST)=0d0
 
   NAMELIST/parinp/ numstates,stateEnergies,couplingmat,expotol,par_timestep,numsteps,notiming,&
-       imagStateEnergies,maxoutstates
+       imagStateEnergies,maxoutstates,maxorder
 
   OFL
   write(mpifileptr, *)

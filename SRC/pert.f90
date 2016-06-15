@@ -8,10 +8,12 @@ subroutine perttheory()
   implicit none
   real*8 :: t1,t2
   integer :: itime
-  complex*16, allocatable :: zerovec(:,:), onevec(:,:), twovec(:,:), threevec(:,:), sumvec(:,:)
+  complex*16, allocatable :: zerovec(:,:), onevec(:,:), twovec(:,:), threevec(:,:), &
+       fourvec(:,:), sumvec(:,:)
 
   allocate(zerovec(numstates,0:numsteps), onevec(numstates,0:numsteps), &
-       twovec(numstates,0:numsteps), threevec(numstates,0:numsteps), sumvec(numstates,0:numsteps))
+       twovec(numstates,0:numsteps), threevec(numstates,0:numsteps), &
+       fourvec(numstates,0:numsteps), sumvec(numstates,0:numsteps))
 
 !! zeroth-order wave function
   zerovec(:,:)=0d0
@@ -23,6 +25,8 @@ subroutine perttheory()
 
   onevec(:,:)=0d0
 
+  if (maxorder.ge.1) then
+
   do itime=1,numsteps  !! propagation from itime-1 to itime
      t1=(itime-1)*par_timestep
      t2=itime*par_timestep
@@ -32,10 +36,13 @@ subroutine perttheory()
   call save1(0,numsteps,par_timestep,onevec(:,:),"onevec",0)
   call save1(0,numsteps,par_timestep,onevec(:,:),"onevec",1)
 
+  endif
 
 !!!!!!!   second-order wave function   !!!!!!
 
   twovec(:,:)=0d0
+
+  if (maxorder.ge.2) then
 
   do itime=1,numsteps  !! propagation from itime-1 to itime
      t1=(itime-1)*par_timestep
@@ -46,10 +53,13 @@ subroutine perttheory()
   call save1(0,numsteps,par_timestep,twovec(:,:),"twovec",0)
   call save1(0,numsteps,par_timestep,twovec(:,:),"twovec",1)
 
+  endif
 
 !!!!!!!   third-order wave function   !!!!!!
 
   threevec(:,:)=0d0
+
+  if (maxorder.ge.3) then
 
   do itime=1,numsteps  !! propagation from itime-1 to itime
      t1=(itime-1)*par_timestep
@@ -61,16 +71,38 @@ subroutine perttheory()
   call save1(0,numsteps,par_timestep,threevec(:,:),"threevec",0)
   call save1(0,numsteps,par_timestep,threevec(:,:),"threevec",1)
 
+  endif
+
+!!!!!!!   fourth-order wave function   !!!!!!
+
+  fourvec(:,:)=0d0
+
+  if (maxorder.ge.4) then
+
+  do itime=1,numsteps  !! propagation from itime-1 to itime
+     t1=(itime-1)*par_timestep
+     t2=itime*par_timestep
+
+     call expoprop(t1,threevec(:,itime-1),t2,threevec(:,itime),fourvec(:,itime-1),fourvec(:,itime))
+  enddo
+
+!  call save1(0,numsteps,par_timestep,fourvec(:,:),"fourvec",0)
+!  call save1(0,numsteps,par_timestep,fourvec(:,:),"fourvec",1)
+
+  endif
+
+  if (maxorder.gt.4) then
+     OFLWR "maxorder.gt.4 not supported",maxorder; CFLST
+  endif
+
 !! SUM THEM
 
-!!  sumvec(:,:)=zerovec(:,:) + onevec(:,:) + twovec(:,:)
-
-  sumvec(:,:)=zerovec(:,:) + onevec(:,:) + twovec(:,:) + threevec(:,:)
+  sumvec(:,:)=zerovec(:,:) + onevec(:,:) + twovec(:,:) + threevec(:,:) + fourvec(:,:)
 
   call save1(0,numsteps,par_timestep,sumvec(:,:),"sumvec",0)
   call save1(0,numsteps,par_timestep,sumvec(:,:),"sumvec",1)
 
-  deallocate(zerovec, onevec, twovec, threevec, sumvec)
+  deallocate(zerovec, onevec, twovec, threevec, fourvec, sumvec)
 
   OFLWR "done perttheory"; CFLST
 

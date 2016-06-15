@@ -24,7 +24,7 @@ couplingmat(3,2) = 0.05d0
 numpulses=1
 pulsetype(1)=1
 omega(1)=9d0
-pulsestrength(1)=2d0
+pulsestrength(1)=6d0
 
 velflag=1
 

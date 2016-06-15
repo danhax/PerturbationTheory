@@ -2,7 +2,7 @@
 &parinp
 
 par_timestep=0.05d0
-numsteps=10
+numsteps=1575
 
 par_timestep=0.025d0
 numsteps=3150
@@ -15,6 +15,8 @@ couplingmat(2,3) = 0.05d0
 couplingmat(3,1) = 0.01d0
 couplingmat(3,2) = 0.05d0
 
+maxorder=3
+
 /
 
 
@@ -26,7 +28,9 @@ pulsetype(1)=2
 phaseshift(1)=1.570796326794897d0
 omega(1)=0.04d0
 omega2(1)=9d0
-intensity(1)=200d0
+intensity(1)=10d0
+intensity(1)=14.1421356d0
+intensity(1)=12.5992d0
 
 velflag=1
 
