@@ -1,0 +1,29 @@
+#!/bin/bash
+
+
+echo '
+
+set style data lines
+
+set xrange [30:40]
+set xrange [0:10]
+set xrange [70:*]
+set xrange [*:*]
+
+set term x11 0
+
+plot "LEN/propvec_abs.dat" using 1:4 lt 1 lw 6 title "2 len abs^2"
+replot "ASQUARED/propvec_abs.dat" using 1:4 lt 4 lw 4 title "2 asquared abs^2"
+replot "propvec_abs.dat" using 1:4 lt 3 lw 2 title "2 vel abs^2"
+
+set term x11 2
+
+plot "LEN/propvec_abs.dat" using 1:5 lt 1 lw 6 title "3 len abs^2"
+replot "ASQUARED/propvec_abs.dat" using 1:5 lt 4 lw 4 title "3 asquared abs^2"
+replot "propvec_abs.dat" using 1:5 lt 3 lw 2 title "3 vel abs^2"
+
+
+' |gnuplot -persist
+
+
+

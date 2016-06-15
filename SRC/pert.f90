@@ -29,8 +29,8 @@ subroutine perttheory()
      call expoprop(t1,zerovec(:,itime-1),t2,zerovec(:,itime),onevec(:,itime-1),onevec(:,itime))
   enddo
 
-  call save1(numstates,0,numsteps,par_timestep,onevec(:,:),"onevec",0)
-  call save1(numstates,0,numsteps,par_timestep,onevec(:,:),"onevec",1)
+  call save1(0,numsteps,par_timestep,onevec(:,:),"onevec",0)
+  call save1(0,numsteps,par_timestep,onevec(:,:),"onevec",1)
 
 
 !!!!!!!   second-order wave function   !!!!!!
@@ -43,8 +43,8 @@ subroutine perttheory()
      call expoprop(t1,onevec(:,itime-1),t2,onevec(:,itime),twovec(:,itime-1),twovec(:,itime))
   enddo
 
-  call save1(numstates,0,numsteps,par_timestep,twovec(:,:),"twovec",0)
-  call save1(numstates,0,numsteps,par_timestep,twovec(:,:),"twovec",1)
+  call save1(0,numsteps,par_timestep,twovec(:,:),"twovec",0)
+  call save1(0,numsteps,par_timestep,twovec(:,:),"twovec",1)
 
 
 !!!!!!!   third-order wave function   !!!!!!
@@ -58,8 +58,8 @@ subroutine perttheory()
      call expoprop(t1,twovec(:,itime-1),t2,twovec(:,itime),threevec(:,itime-1),threevec(:,itime))
   enddo
 
-  call save1(numstates,0,numsteps,par_timestep,threevec(:,:),"threevec",0)
-  call save1(numstates,0,numsteps,par_timestep,threevec(:,:),"threevec",1)
+  call save1(0,numsteps,par_timestep,threevec(:,:),"threevec",0)
+  call save1(0,numsteps,par_timestep,threevec(:,:),"threevec",1)
 
 !! SUM THEM
 
@@ -67,8 +67,8 @@ subroutine perttheory()
 
   sumvec(:,:)=zerovec(:,:) + onevec(:,:) + twovec(:,:) + threevec(:,:)
 
-  call save1(numstates,0,numsteps,par_timestep,sumvec(:,:),"sumvec",0)
-  call save1(numstates,0,numsteps,par_timestep,sumvec(:,:),"sumvec",1)
+  call save1(0,numsteps,par_timestep,sumvec(:,:),"sumvec",0)
+  call save1(0,numsteps,par_timestep,sumvec(:,:),"sumvec",1)
 
   deallocate(zerovec, onevec, twovec, threevec, sumvec)
 
@@ -101,15 +101,27 @@ contains
     real*8, intent(in) :: midtime
     complex*16, intent(in) :: invec(numstates)
     complex*16, intent(out) :: outvec(numstates)
+    complex*16 :: velocityop(numstates,numstates) !! AUTOMATIC
     real*8 :: mypot
 
-    mypot = vectdpot(midtime, velflag)
-    outvec(:) = mypot * MATMUL(mycouplingmat(1:numstates,1:numstates), invec(:))
+    velocityop(:,:)=0d0
 
-!  ummm... does not seem to be right including a-squared term
-!    if (velflag.ne.0) then
-!       outvec(:) = outvec(:) + mypot**2/4d0 * invec(:)
-!    endif
+    mypot = vectdpot(midtime, velflag)
+
+    if (velflag.eq.2) then
+       outvec(:)=0d0
+    else
+       outvec(:) = mypot * MATMUL(mycouplingmat(1:numstates,1:numstates), invec(:))
+    endif
+
+    if (velflag.eq.1) then
+!! factor of 1/4 in asquaredop
+       outvec(:) = outvec(:) + mypot**2 * MATMUL(asquaredop(:,:),invec(:))
+    elseif (velflag.eq.2) then
+       call get_velocityop(mypot,velocityop(:,:))
+       outvec(:) = outvec(:) + MATMUL(velocityop(:,:),invec(:))
+    endif
+
   end subroutine potoperate
 
 end module jacopmod

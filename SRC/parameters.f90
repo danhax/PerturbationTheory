@@ -36,11 +36,15 @@ module parameters
 
   character(len=SLN) :: inpfile="Input.Inp"
 
-!! namelist input stateenergies, imagstateenergies, and couplingmat.
+!! namelist input stateenergies, imagstateenergies, and couplingmat; 
+!!   couplingmat has length gauge matrix elements.
 !! internal variables:
   complex*16,allocatable :: mystateEnergies(:)
-  complex*16,allocatable :: mycouplingmat(:,:)
-
+  complex*16,allocatable,target :: couplingmatlen(:,:)
+  complex*16,allocatable,target :: couplingmatvel(:,:)
+  complex*16,allocatable :: asquaredop(:,:)  !! with factor 1/4
+  complex*16, pointer :: mycouplingmat(:,:)
+  
   character(len=SLN) :: nullbuff
 
 end module parameters

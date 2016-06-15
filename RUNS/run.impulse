@@ -1,0 +1,14 @@
+
+./pert Inp=Input.Inp.impulse Length
+./exact Inp=Input.Inp.impulse Length
+
+mv *dat LEN/
+
+./pert Inp=Input.Inp.impulse Asquared
+./exact Inp=Input.Inp.impulse Asquared
+
+mv *dat ASQUARED/
+
+./pert Inp=Input.Inp.impulse Velocity
+./exact Inp=Input.Inp.impulse Velocity
+

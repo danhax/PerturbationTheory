@@ -25,13 +25,13 @@ mainpert.o: $(DEPEND) mainpert.F90
 mainexact.o: $(DEPEND) mainexact.F90
 	$(F90) $(FFLAGS) $(MPIFLAG) -c mainexact.F90 
 
-stuff.o: $(DEPEND) stuff.F90 pulse.o
+stuff.o: $(DEPEND) stuff.F90 pulse.o utils.o
 	$(F90) $(FFLAGS) $(MPIFLAG) -c stuff.F90 
 
 pert.o: $(DEPEND) pert.F90 pulse.o
 	$(F90) $(FFLAGS) $(MPIFLAG) -c pert.F90 
 
-exact.o: $(DEPEND) exact.F90 pulse.o
+exact.o: $(DEPEND) exact.F90 pulse.o utils.o
 	$(F90) $(FFLAGS) $(MPIFLAG) -c exact.F90 
 
 pulse.o: $(DEPEND) pulse.F90  

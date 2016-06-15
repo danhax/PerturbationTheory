@@ -21,8 +21,8 @@ subroutine schrodinger()
      call exactprop(t1,t2,propvec(:,itime-1),propvec(:,itime))
   enddo
 
-  call save1(numstates,0,numsteps,par_timestep,propvec(:,:),"propvec",0)
-  call save1(numstates,0,numsteps,par_timestep,propvec(:,:),"propvec",1)
+  call save1(0,numsteps,par_timestep,propvec(:,:),"propvec",0)
+  call save1(0,numsteps,par_timestep,propvec(:,:),"propvec",1)
 
   deallocate(propvec)
 
@@ -55,8 +55,11 @@ subroutine exactprop(time1,time2,invec,outvec)
   real*8,intent(in) :: time1,time2
   complex*16, intent(in) :: invec(numstates)
   complex*16, intent(out) :: outvec(numstates)
+  complex*16 :: velocityop(numstates,numstates)
   real*8 :: mypot,midtime,tdiff
   integer :: istate
+
+  velocityop(:,:)=0d0
 
   tdiff=(time2-time1)
   midtime=(time2+time1)/2d0
@@ -65,19 +68,24 @@ subroutine exactprop(time1,time2,invec,outvec)
   if (mypot.eq.0d0) then
      outvec(:) = invec(:) * h0diagexp(:)
   else
-     hammatexp(:,:) = mypot * (0d0,-1d0) * par_timestep * mycouplingmat(1:numstates,1:numstates)
+     if (velflag.eq.2) then
+        hammatexp(:,:)=0d0
+     else
+        hammatexp(:,:) = mypot * (0d0,-1d0) * par_timestep * mycouplingmat(1:numstates,1:numstates)
+     endif
+
      do istate=1,numstates
         hammatexp(istate,istate) = hammatexp(istate,istate) + &
              (0d0,-1d0) * par_timestep * myStateEnergies(istate)
      enddo
 
-!  ummm... does not seem to be right including a-squared term
-!     if (velflag.ne.0) then
-!        do istate=1,numstates
-!           hammatexp(istate,istate) = hammatexp(istate,istate) + &
-!                (0d0,-1d0) * par_timestep * mypot**2/4d0
-!        enddo
-!     endif
+     if (velflag.eq.1) then
+!! factor of 1/4 in asquaredop
+        hammatexp(:,:) = hammatexp(:,:) + (0d0,-1d0) * par_timestep * mypot**2 * asquaredop(:,:) 
+     elseif (velflag.eq.2) then
+        call get_velocityop(mypot,velocityop)
+        hammatexp(:,:) = hammatexp(:,:) + (0d0,-1d0) * par_timestep * velocityop(:,:)
+     endif
 
      call expmat(hammatexp,numstates)
      outvec(:) = MATMUL(hammatexp(:,:),invec(:))

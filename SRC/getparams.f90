@@ -87,7 +87,7 @@ subroutine getparams()
      myiostat=0
      if (buffer(1:10) .eq. 'Numstates=') then
         read(buffer(11:len),*,iostat=myiostat) numstates
-        write(mpifileptr,*) "Numstates set to  ", numstates, " by command line option."
+        OFLWR "Numstates set to  ", numstates, " by command line option."; CFL
      endif
 
      call checkiostat(myiostat," command line argument "//buffer)     
@@ -105,19 +105,40 @@ subroutine getparams()
      couplingmat(istate,istate)=0d0
   enddo
 
-  allocate(mystateenergies(numstates),mycouplingmat(numstates,numstates))
+  allocate(mystateenergies(numstates),couplingmatlen(numstates,numstates),&
+       couplingmatvel(numstates,numstates),asquaredop(numstates,numstates))
+
   mystateenergies(:) = stateenergies(1:numstates) &
        + (0d0,1d0) * imagstateenergies(1:numstates)
-  mycouplingmat(:,:) = couplingmat(1:numstates,1:numstates)
+
+  couplingmatlen(:,:) = couplingmat(1:numstates,1:numstates)
+
+  do istate=1,numstates
+     couplingmatvel(istate,1:numstates) = couplingmatlen(istate,1:numstates) &
+          * (0d0,-1d0) * (stateEnergies(istate)-stateEnergies(1:numstates))
+  enddo
+
+  do istate=1,numstates
+     couplingmatvel(istate,1:numstates) = couplingmatlen(istate,1:numstates) &
+          * (0d0,-1d0) * (stateEnergies(istate)-stateEnergies(1:numstates))
+  enddo
+
+!! factor of 1/4 in asquaredop
+
+  asquaredop(:,:) = (0d0,+0.5d0) * &
+       ( MATMUL(couplingmatlen(:,:), couplingmatvel(:,:)) - &
+       MATMUL(couplingmatvel(:,:), couplingmatlen(:,:)) )
+
+!! TEMP
+!  asquaredop(:,:)=0d0
 
   call getpulse(0)
 
   if (velflag.ne.0) then
      OFLWR "changing matrix elements (input in length gauge) to velocity gauge"; CFL
-     do istate=1,numstates
-        mycouplingmat(istate,1:numstates) = mycouplingmat(istate,1:numstates) &
-             * (0d0,1d0) * (stateEnergies(istate)-stateEnergies(1:numstates))
-     enddo
+     mycouplingmat => couplingmatvel
+  else
+     mycouplingmat => couplingmatlen
   endif
 
 end subroutine getparams
@@ -130,9 +151,13 @@ subroutine getpulse(no_error_exit_flag)   !! if flag is 0, will exit if &pulse i
   implicit none
   NAMELIST /pulse/ omega,pulsestart,pulsestrength, velflag, omega2,phaseshift,intensity,pulsetype, &
        pulsetheta,pulsephi, longstep, numpulses, chirp, ramp
+#ifdef PGFFLAG
+  integer :: myiargc
+#endif
+  character (len=SLN) :: buffer
   real*8 ::  time,   lastfinish, fac, pulse_end, estep
   complex*16 :: pots1(3),pots2(3),pots3(3), pots4(3), pots5(3), csumx,csumy,csumz
-  integer :: i, myiostat, ipulse,no_error_exit_flag
+  integer :: i, myiostat, ipulse,no_error_exit_flag,nargs,len,getlen
   character (len=12) :: line
   real*8, parameter :: epsilon=1d-4
   integer, parameter :: neflux=10000
@@ -149,6 +174,34 @@ subroutine getpulse(no_error_exit_flag)   !! if flag is 0, will exit if &pulse i
      endif
   endif
   close(971)
+
+#ifdef PGFFLAG
+  nargs=myiargc()
+#else
+  nargs=iargc()
+#endif
+
+  do i=1,nargs
+     buffer=nullbuff;     call getarg(i,buffer);     len=getlen(buffer)
+     myiostat=0
+     if (buffer(1:8) .eq. 'Velocity') then
+        velflag=2
+        OFLWR "Exact velocity gauge set by command line option"; CFL
+     endif
+     if (buffer(1:8) .eq. 'Asquared') then
+        velflag=1
+        OFLWR "Second-order velocity gauge set by command line option"; CFL
+     endif
+     if (buffer(1:6) .eq. 'Length') then
+        velflag=0
+        OFLWR "Length gauge set by command line option"; CFL
+     endif
+
+     call checkiostat(myiostat," command line argument "//buffer)     
+  enddo
+
+
+
   OFLWR "Gauge is.... "
 
   select case (velflag)

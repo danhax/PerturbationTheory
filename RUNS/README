@@ -1,7 +1,21 @@
 
 run directory with link to ../BIN/pert
 
-run program pert after compiling in BIN
+Scripts run.impulse and run.regular do calculations for two different pulses with 3 states lambda model.
+
+The scripts run the programs pert and exact.
+
+Gnuplot scripts gnu.complex and gnu.abs plot the real and imaginary part of the amplitudes for states 2 and 3
+in the interaction picture (regardless of which script you run).
+
+-----
+
+program exact:
+
+outputs propvec.dat and propvec_abs.dat like the files below
+
+
+program pert:
 
 output files, given 3-state calculation:
 

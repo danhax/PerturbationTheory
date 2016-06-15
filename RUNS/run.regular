@@ -1,0 +1,14 @@
+
+./pert Inp=Input.Inp Length
+./exact Inp=Input.Inp Length
+
+mv *dat LEN/
+
+./pert Inp=Input.Inp Asquared
+./exact Inp=Input.Inp Asquared
+
+mv *dat ASQUARED/
+
+./pert Inp=Input.Inp Velocity
+./exact Inp=Input.Inp Velocity
+
